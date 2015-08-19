@@ -71,10 +71,10 @@ class MyServiceController(ServiceController):
 class MyServer(Server):
     def __init__(
             self,
-            all_primes,
-            startint_integer,
-            ending_integer,
-            increment,
+            all_primes=None,
+            startint_integer=None,
+            ending_integer=None,
+            increment=None,
             host=None,
             port=None,
             max_queued_connections=None,
@@ -122,10 +122,10 @@ class MyServer(Server):
 if __name__ == '__main__':
     main_primes = []
     server = MyServer(
-        main_primes,
-        1,
-        100,
-        10,
+        all_primes=main_primes,
+        startint_integer=1,
+        ending_integer=100,
+        increment=10,
         host=socket.gethostname(),
         port=1270,
         max_queued_connections=5,
