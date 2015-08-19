@@ -12,8 +12,8 @@ class MyServerProcessThread(ServerProcessorThread):
         super(MyServerProcessThread, self).__init__(client=client, assigned_work=assigned_work)
 
     def run(self):
+        self.client.setblocking(1)
         while True:
-            self.client.setblocking(1)
             request = json.loads(self.client.recv(1024))
             if request['request'] == 'give_me_work':
                 self.client.send(json.dumps(self.assigned_work))
