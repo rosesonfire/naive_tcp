@@ -24,7 +24,14 @@ class MyServerProcessThread(ServerProcessorThread):
 
 class MyServiceThread(ServiceThread):
 
-    def __init__(self, prime_segment=None, thread_id=None, client=None, msg_queue=None, assigned_work=None, processor_thread_class=None):
+    def __init__(
+            self,
+            prime_segment=None,
+            thread_id=None,
+            client=None,
+            msg_queue=None,
+            assigned_work=None,
+            processor_thread_class=None):
         self.prime_segment = prime_segment
         super(MyServiceThread, self).__init__(
             thread_id=thread_id,

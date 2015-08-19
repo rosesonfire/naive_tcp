@@ -40,4 +40,3 @@ class Client:
     def start(self):
         self.processor_thread.start()
         self.processor_thread.join()
-

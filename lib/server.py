@@ -143,4 +143,3 @@ class Server:
             except socket.error:
                 pass
             self.server_work()
-
