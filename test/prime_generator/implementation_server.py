@@ -1,15 +1,17 @@
-from lib.server import Server, ServiceController, ServiceThread, ServerProcessorThread
 import json
-import socket
 import sys
+from datetime import datetime
+
+from ...lib.server import Server, ServiceController, ServiceThread, ServerProcessorThread
+import meta
 
 
 class MyServerProcessThread(ServerProcessorThread):
 
-    def __init__(self, prime_segment=None, client=None, assigned_work=None):
+    def __init__(self, prime_segment=None, thread_id=None, client=None, assigned_work=None):
         self.prime_segment = prime_segment
         self.myWork = assigned_work
-        super(MyServerProcessThread, self).__init__(client=client, assigned_work=assigned_work)
+        super(MyServerProcessThread, self).__init__(thread_id=thread_id, client=client, assigned_work=assigned_work)
 
     def run(self):
         self.client.setblocking(1)
@@ -17,9 +19,12 @@ class MyServerProcessThread(ServerProcessorThread):
             request = json.loads(self.client.recv(1024))
             if request['request'] == 'give_me_work':
                 self.client.send(json.dumps(self.assigned_work))
+                if 'error' in self.assigned_work:
+                    break
             elif request['request'] == 'take_my_primes':
                 self.prime_segment['primes'] = request['primes']
                 break
+        self.client.close()
 
 
 class MyServiceThread(ServiceThread):
@@ -63,10 +68,12 @@ class MyServiceController(ServiceController):
 
     def get_new_work(self):
         for prime_segment in self.prime_segments:
-            if prime_segment['primes'] is None:
+            # if prime_segment['primes'] is None:
+            if not prime_segment['assigned']:
+                prime_segment['assigned'] = True
                 self.latest_prime_segment_given = prime_segment
                 return {"start": prime_segment['start'], "end": prime_segment['end']}
-        raise Exception('No undone work to give !')
+        return {"error": "No undone work to give !"}
 
     def get_service_thread_args(self):
         return []
@@ -79,7 +86,7 @@ class MyServer(Server):
     def __init__(
             self,
             all_primes=None,
-            startint_integer=None,
+            starting_integer=None,
             ending_integer=None,
             increment=None,
             host=None,
@@ -89,16 +96,17 @@ class MyServer(Server):
             service_thread_class=None,
             processor_thread_class=None):
 
+        self.starting_time = None
         self.all_primes = all_primes
         self.prime_segments = []
-        i = startint_integer
+        i = starting_integer
         while True:
             if i > ending_integer:
                 break
             if i+increment > ending_integer:
-                self.prime_segments.append({"start": i, "end": ending_integer, "primes": None})
+                self.prime_segments.append({"start": i, "end": ending_integer, "primes": None, "assigned": False})
             else:
-                self.prime_segments.append({"start": i, "end": i+increment, "primes": None})
+                self.prime_segments.append({"start": i, "end": i+increment, "primes": None, "assigned": False})
             i += increment
 
         super(MyServer, self).__init__(
@@ -109,6 +117,10 @@ class MyServer(Server):
             service_thread_class=service_thread_class,
             processor_thread_class=processor_thread_class)
 
+    def start(self):
+        self.starting_time = datetime.now()
+        super(MyServer, self).start()
+
     def server_work(self):
         for prime_segment in self.prime_segments:
             if prime_segment['primes'] is None:
@@ -117,6 +129,8 @@ class MyServer(Server):
         for prime_segment in self.prime_segments:
             all_primes.extend(prime_segment['primes'])
         print json.dumps(all_primes)
+        time_taken = datetime.now() - self.starting_time
+        print "\n\ntime taken", time_taken
         sys.exit()
 
     def get_service_controller_args(self):
@@ -130,11 +144,11 @@ if __name__ == '__main__':
     main_primes = []
     server = MyServer(
         all_primes=main_primes,
-        startint_integer=1,
-        ending_integer=100,
-        increment=10,
-        host=socket.gethostname(),
-        port=1270,
+        starting_integer=meta.starting_integer,
+        ending_integer=meta.ending_integer,
+        increment=meta.increment,
+        host=meta.host,
+        port=meta.port,
         max_queued_connections=5,
         service_controller_class=MyServiceController,
         service_thread_class=MyServiceThread,
