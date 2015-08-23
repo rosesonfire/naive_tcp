@@ -1,7 +1,7 @@
 import socket
 
 host = socket.gethostname()
-port = 1271
+port = 1272
 
 starting_integer = 1
 ending_integer = 1000

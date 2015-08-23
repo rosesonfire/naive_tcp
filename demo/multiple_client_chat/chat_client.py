@@ -22,10 +22,15 @@ class MyClientProcessThread(ClientProcessorThread):
     def __init__(self, server_host=None, server_port=None):
         super(MyClientProcessThread, self).__init__(server_host=server_host, server_port=server_port)
         self.input_queue = Queue()
+        self.client_id = None
         keyboard_input = KeyBoardInputThread(input_queue=self.input_queue)
         keyboard_input.start()
 
     def process(self):
+        self.client.setblocking(1)
+        self.client_id = json.loads(self.client.recv(1025))["client_id"]
+        self.client.send(json.dumps({"received_client_id": self.client_id}))
+        print 'CLIENT ID: ', self.client_id
         self.client.setblocking(0)
         while True:
             try:
@@ -33,8 +38,8 @@ class MyClientProcessThread(ClientProcessorThread):
                     out_msg = self.input_queue.get()
                     self.client.send(json.dumps({"msg": out_msg}) + ',')
                 in_msgs = json.loads('[' + self.client.recv(1025)[0:-1] + ']')
-                for in_msg in in_msgs:
-                    print in_msg['msg']
+                for msg_obj in in_msgs:
+                    print msg_obj['author'], ' (' + msg_obj['time'] + '):', msg_obj['msg']
             except socket.error:
                 pass
         self.client.close()

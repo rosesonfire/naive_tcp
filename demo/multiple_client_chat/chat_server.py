@@ -2,6 +2,7 @@ from ...lib.server import Server, ServiceController, ServiceThread, ServerProces
 import json
 import meta
 import socket
+from datetime import datetime
 
 
 class MyServerProcessThread(ServerProcessorThread):
@@ -12,20 +13,33 @@ class MyServerProcessThread(ServerProcessorThread):
         super(MyServerProcessThread, self).__init__(thread_id=thread_id, client=client, assigned_work=assigned_work)
 
     def run(self):
+        self.client.setblocking(1)
+        self.client.send(json.dumps({"client_id": self.thread_id}))
+        acknowledged_thread_id = json.loads(self.client.recv(1025))["received_client_id"]
+        if str(acknowledged_thread_id) is not str(self.thread_id):
+            raise Exception('Client ID error!')
         self.client.setblocking(0)
         while True:
             try:
                 msgs_in = json.loads('[' + self.client.recv(1024)[0:-1] + ']')
                 for msg_in in msgs_in:
-                    self.chat_msg_queue.append({"msg": msg_in['msg'], "seen_by": []})
+                    self.chat_msg_queue.append(
+                        {
+                            "msg": msg_in['msg'],
+                            "author": "client "+str(self.thread_id),
+                            "time": datetime.now(),
+                            "seen_by": []
+                        })
             except socket.error:
                 pass
 
             try:
                 for msg_obj in self.chat_msg_queue:
                     if self.thread_id not in msg_obj["seen_by"]:
-                        msg_out = msg_obj['msg']
-                        self.client.send(json.dumps({"msg": msg_out}) + ',')
+                        msg = msg_obj['msg']
+                        author = msg_obj['author']
+                        time = msg_obj['time']
+                        self.client.send(json.dumps({"msg": msg, "author": author, "time": str(time)}) + ',')
                         msg_obj["seen_by"].append(self.thread_id)
             except socket.error:
                 pass
