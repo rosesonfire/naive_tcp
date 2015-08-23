@@ -6,8 +6,9 @@ import socket
 
 class ServerProcessorThread(Thread):
 
-    def __init__(self, client=None, assigned_work=None):
+    def __init__(self, thread_id=None, client=None, assigned_work=None):
         super(ServerProcessorThread, self).__init__()
+        self.thread_id = thread_id
         self.client = client
         self.assigned_work = assigned_work
 
@@ -28,10 +29,10 @@ class ServiceThread(Thread):
         processor_thread_args = self.get_processor_thread_args()
         processor_thread_kwargs = self.get_processor_thread_kwargs()
         processor_thread_kwargs.update({
+            "thread_id": thread_id,
             "client": client,
             "assigned_work": assigned_work})
         self.processor_thread = processor_thread_class(*processor_thread_args, **processor_thread_kwargs)
-        self.processor_thread.start()
 
     @abstractmethod
     def get_processor_thread_args(self):
@@ -50,6 +51,7 @@ class ServiceThread(Thread):
             self.handle_msg(self.msg_queue.get())
 
     def run(self):
+        self.processor_thread.start()
         while True:
             if not self.processor_thread.is_alive():
                 break
@@ -136,7 +138,7 @@ class Server:
         while True:
             try:
                 client, addr = self.server.accept()
-                client.setblocking(0)
+                client.setblocking(1)
                 self.service_controller.create_new_service_thread(
                     client=client,
                     processor_thread_class=self.processor_thread_class)
