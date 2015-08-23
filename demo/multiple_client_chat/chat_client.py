@@ -39,7 +39,10 @@ class MyClientProcessThread(ClientProcessorThread):
                     self.client.send(json.dumps({"msg": out_msg}) + ',')
                 in_msgs = json.loads('[' + self.client.recv(1025)[0:-1] + ']')
                 for msg_obj in in_msgs:
-                    print msg_obj['author'], ' (' + msg_obj['time'] + '):', msg_obj['msg']
+                    author = msg_obj['author']
+                    time = msg_obj['time']
+                    msg = msg_obj['msg']
+                    print author, ' (' + time + '):', msg
             except socket.error:
                 pass
         self.client.close()
