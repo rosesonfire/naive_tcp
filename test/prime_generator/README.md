@@ -4,15 +4,21 @@
 
 From the directory
 
-```py_tcp_client_server_library/../```
+```
+py_tcp_client_server_library/../
+```
 
 In a terminal, run the prime generator server
 
-```python -m py_tcp_client_server_library.test.prime_generator.prime_server```
+```
+python -m py_tcp_client_server_library.test.prime_generator.prime_server
+```
 
 Run the prime generator client several times in different terminals, each time opening a client
 
-```python -m py_tcp_client_server_library.test.prime_generator.prime_client```
+```
+python -m py_tcp_client_server_library.test.prime_generator.prime_client
+```
 
 ###End result
 
@@ -21,5 +27,7 @@ The server will display all the primes between 1 and 100. Each client instance w
 ### How to run in multiple computers
 To change HOST or PORT, edit
 
-```py_tcp_client_server_library/test/prime_generator/meta.py```
+```
+py_tcp_client_server_library/test/prime_generator/meta.py
+```
 
