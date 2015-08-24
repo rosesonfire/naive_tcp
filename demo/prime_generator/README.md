@@ -28,7 +28,7 @@ The server will display all the primes between 1 and 1000. Each client instance 
 To change starting integer, ending integer or size of work block for each client, edit
 
 ```
-py_tcp_client_server_library/test/prime_generator/meta.py
+py_tcp_client_server_library/demo/prime_generator/meta.py
 ```
 
 ### How to run in multiple computers
