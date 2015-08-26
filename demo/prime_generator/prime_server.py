@@ -2,7 +2,7 @@ import json
 import sys
 from datetime import datetime
 
-from ...lib.server import Server, ServiceController, ServiceThread, ServerProcessorThread
+from naivetcp.server import Server, ServiceController, ServiceThread, ServerProcessorThread
 import meta
 
 

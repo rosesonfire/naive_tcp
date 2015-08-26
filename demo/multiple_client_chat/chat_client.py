@@ -1,4 +1,4 @@
-from ...lib.client import Client, ClientProcessorThread
+from naivetcp.client import Client, ClientProcessorThread
 import json
 import socket
 import meta

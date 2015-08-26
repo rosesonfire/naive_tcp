@@ -1,7 +1,7 @@
 import json
 import socket
 
-from ...lib.client import Client, ClientProcessorThread
+from naivetcp.client import Client, ClientProcessorThread
 import meta
 
 

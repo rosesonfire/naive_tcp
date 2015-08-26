@@ -1,4 +1,4 @@
-from ...lib.server import Server, ServiceController, ServiceThread, ServerProcessorThread
+from naivetcp.server import Server, ServiceController, ServiceThread, ServerProcessorThread
 import json
 import meta
 import socket
