@@ -99,7 +99,7 @@ class ServiceController:
         self.active_threads[thread_id].start()
 
 
-class Server:
+class Server(Thread):
     __metaclass__ = ABCMeta
 
     def __init__(
@@ -120,6 +120,7 @@ class Server:
         service_controller_kwargs.update({"service_thread_class": service_thread_class})
         self.service_controller = service_controller_class(*service_controller_args, **service_controller_kwargs)
         self.processor_thread_class = processor_thread_class
+        super(Server, self).__init__()
 
     @abstractmethod
     def server_work(self):
@@ -133,7 +134,7 @@ class Server:
     def get_service_controller_kwargs(self):
         pass
 
-    def start(self):
+    def run(self):
         self.server.listen(self.max_queued_connections)
         while True:
             try:

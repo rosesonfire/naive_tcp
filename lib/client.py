@@ -24,11 +24,17 @@ class ClientProcessorThread(Thread):
             print 'client side connection lost'
 
     def run(self):
-        self.client.connect((self.server_host, self.server_port))
+        self.client.setblocking(0)
+        while True:
+            try:
+                self.client.connect((self.server_host, self.server_port))
+                break
+            except socket.error:
+                pass
         self.process()
 
 
-class Client:
+class Client(Thread):
     __metaclass__ = ABCMeta
 
     def __init__(
@@ -44,8 +50,9 @@ class Client:
             "server_port": server_port})
         self.processor_thread = processor_thread_class(*client_processor_thread_args, **client_processor_thread_kwargs)
         # self.processor_thread = processor_thread_class(server_host, server_port)
+        super(Client, self).__init__()
 
-    def start(self):
+    def run(self):
         self.processor_thread.start()
         self.processor_thread.join()
 
